@@ -50,3 +50,38 @@ promptTemplate = PromptTemplate(
     template = prompt
 )
 
+## Combine tools into a chain
+chain = LLMChain(llm = llm, prompt = promptTemplate)
+
+reasoningTool = Tool(
+    name = 'Reasoing Tool',
+    func = chain.run,
+    description = 'Reasoning Tool for answering logic-based and reasoning questions'
+)
+
+## Initialize the agents
+assistantAgent = initialize_agent(
+    tools = [wikipediaTool, calculator, reasoningTool],
+    llm = llm, 
+    agent = AgentType.ZERO_SHOT_REACT_DESCRIPTIION,
+    verbose = False,
+    handle_parsing_errors = True
+)
+
+if "messages" not in st.session_state:
+    st.session_state['messages'] = [{
+        'role': 'assistant',
+        'content': 'Hello! I am an AI assistant. I can help you with math problems and data search. How can I help you today?'
+        }
+    ]
+
+for msg in st.session_state['messages']:
+    st.chat_message(msg['role']).write(msg['content'])
+    
+
+## Function to generate a response
+def generateResponse(question):
+    response = assistantAgent.invoke({'input': question})
+    return response
+
+ 
