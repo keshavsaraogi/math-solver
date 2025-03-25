@@ -36,14 +36,15 @@ wikipediaTool = Tool(
 ## Initialize the math tool
 mathChain = LLMMathChain.from_llm(llm = llm)
 calculator = Tool(
-    name = "Calculator",
-    func = mathChain.run,
-    description = "Tool for answering math problems. Only mathematically expressions are supported."
+    name="Calculator",
+    func=mathChain.run,
+    description="Tool for answering math problems that involve calculations. Only mathematically expressions are supported."
 )
 
 prompt = """
 You are an agent tasked for solving user's mathematical problems.
-Logically arrive at the solution and provide a detailed explanation and display the steps in points for the question below.
+If the user asks for a numerical value, provide the result directly.
+If the user asks for a calculation, logically arrive at the solution and provide a detailed explanation and display the steps in points for the question below.
 Question: {question}
 Answer: 
 """
@@ -57,9 +58,9 @@ promptTemplate = PromptTemplate(
 chain = LLMChain(llm = llm, prompt = promptTemplate)
 
 reasoningTool = Tool(
-    name = 'Reasoning Tool',
-    func = chain.run,
-    description = 'Reasoning Tool for answering logic-based and reasoning questions'
+    name='Reasoning Tool',
+    func=chain.run,
+    description='Reasoning Tool for answering logic-based and reasoning questions. Do not use this tool for numerical values. If the user asks for a numerical value, provide the result directly.'
 )
 
 ## Initialize the agents
