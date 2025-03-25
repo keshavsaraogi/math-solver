@@ -15,7 +15,11 @@ load_dotenv()
 st.set_page_config(page_title="Text To Math Problem Solver and Data Search Assistant")
 st.title("Text To Math Problem Solver and Data Search Assistant")
 
-groqApiKey = os.getenv("GROQ_API_KEY")
+if "GROQ_API_KEY" in st.secrets:
+    groqApiKey = st.secrets["GROQ_API_KEY"]
+else:
+    groqApiKey = os.getenv("GROQ_API_KEY")
+
 
 if not groqApiKey:
     st.info('Please set the GROQ_API_KEY environment variable to use this app.')
@@ -98,3 +102,4 @@ if st.button("Find My Answer"):
             st.success(response)
     else:
         st.warning("Please enter a question to get an answer.")
+        
