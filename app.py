@@ -20,8 +20,6 @@ if "GROQ_API_KEY" in st.secrets:
 else:
     groqApiKey = os.getenv("GROQ_API_KEY")
 
-print(f"Groq API Key: {groqApiKey}") # Add this line for debugging
-
 if not groqApiKey:
     st.info('Please set the GROQ_API_KEY environment variable to use this app.')
     
