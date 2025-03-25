@@ -1,2 +1,4 @@
 /math_venv
 .env
+secrets.toml
+/.streamlit
