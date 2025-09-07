@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-## Set up the Streamlit app
 st.set_page_config(page_title="Text To Math Problem Solver and Data Search Assistant")
 st.title("Text To Math Problem Solver and Data Search Assistant")
 
@@ -21,24 +20,23 @@ else:
     groqApiKey = os.getenv("GROQ_API_KEY")
 
 if not groqApiKey:
-    st.info('Please set the GROQ_API_KEY environment variable to use this app.')
-    
+    st.info('Please set the GROQ_API_KEY environment variable (or Streamlit secret) to use this app.')
+    st.stop()
+
 llm = ChatGroq(model = "gemma2-9b-it", groq_api_key = groqApiKey)
 
-## Initialize wikipedia tool
 wikipediaWrapper = WikipediaAPIWrapper()
 wikipediaTool = Tool(
     name = "Wikipedia",
     func = wikipediaWrapper.run,
-    description = "Search and Solve Wikipedia for information on the topics mentioned"
+    description = "Search Wikipedia for factual summaries. Do not use for calculations or step-by-step reasoning."
 )
 
-## Initialize the math tool
 mathChain = LLMMathChain.from_llm(llm = llm)
 calculator = Tool(
     name="Calculator",
     func=mathChain.run,
-    description="Tool for answering math problems that involve calculations. Only mathematically expressions are supported."
+    description="Use for numeric calculations on pure mathematical expressions. Return only the numeric result when asked."
 )
 
 prompt = """
@@ -54,16 +52,14 @@ promptTemplate = PromptTemplate(
     template = prompt
 )
 
-## Combine tools into a chain
 chain = LLMChain(llm = llm, prompt = promptTemplate)
 
 reasoningTool = Tool(
     name='Reasoning Tool',
     func=chain.run,
-    description='Reasoning Tool for answering logic-based and reasoning questions. Do not use this tool for numerical values. If the user asks for a numerical value, provide the result directly.'
+    description='Use for logic/step-by-step reasoning when no numeric computation is required. Do not use for calculations or factual lookups.'
 )
 
-## Initialize the agents
 assistantAgent = initialize_agent(
     tools = [wikipediaTool, calculator, reasoningTool],
     llm = llm,
@@ -81,12 +77,6 @@ if "messages" not in st.session_state:
 for msg in st.session_state['messages']:
     st.chat_message(msg['role']).write(msg['content'])
 
-## Function to generate a response
-def generateResponse(question):
-    response = assistantAgent.invoke({'input': question})
-    return response
-
-## User Interaction
 userQuestion = st.text_area("Ask me a question", "What is the numerical value of pi to 10 decimal places? Please provide only the numerical result, without any code or explanations.")
 
 if st.button("Find My Answer"):
